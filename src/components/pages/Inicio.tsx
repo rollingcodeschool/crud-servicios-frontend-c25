@@ -1,8 +1,16 @@
 import CardServicio from "../services/CardServicio";
 import { useAppContext } from "../../context/AppContext";
+import { useEffect } from "react";
 const Inicio = () => {
-  const { servicios } = useAppContext();
+  const { servicios, setServicios } = useAppContext();
 
+  useEffect(()=>{
+    consultarAPI()
+  },[])
+
+  const consultarAPI= async ()=>{
+    //usar la query listarServicios
+  }
   return (
     <section className="space-y-8 animate-fadeIn">
       {/* Encabezado con estilo moderno */}

@@ -1,16 +1,30 @@
 import CardServicio from "../services/CardServicio";
 import { useAppContext } from "../../context/AppContext";
 import { useEffect } from "react";
+import { listarServicios } from "../../helpers/queries";
+import Swal from "sweetalert2";
 const Inicio = () => {
   const { servicios, setServicios } = useAppContext();
 
-  useEffect(()=>{
-    consultarAPI()
-  },[])
+  useEffect(() => {
+    consultarAPI();
+  }, []);
 
-  const consultarAPI= async ()=>{
+  const consultarAPI = async () => {
+    const respuesta = await listarServicios();
+    console.log(respuesta);
+    if (respuesta?.status === 200) {
+      const datos = await respuesta.json();
+      setServicios(datos);
+    } else {
+      Swal.fire({
+        title: "Ocurrio un error",
+        text: "No se pudieron obtener los datos",
+        icon: "error",
+      });
+    }
     //usar la query listarServicios
-  }
+  };
   return (
     <section className="space-y-8 animate-fadeIn">
       {/* Encabezado con estilo moderno */}
@@ -32,7 +46,7 @@ const Inicio = () => {
       {servicios.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {servicios.map((servicio) => (
-            <CardServicio key={servicio.id} servicio={servicio} />
+            <CardServicio key={servicio._id} servicio={servicio} />
           ))}
         </div>
       ) : (

@@ -3,7 +3,8 @@ import Swal from "sweetalert2";
 import type { Servicio, ServicioFormData } from "../../interfaces/servicios";
 import { useAppContext } from "../../context/AppContext";
 import { useNavigate, useParams } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { crearServicio } from "../../helpers/queries";
 
 interface FormularioProps {
   titulo: string;
@@ -20,8 +21,8 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
   // traigo los datos que necesito del contexto
   const { id } = useParams<{ id: string }>();
   const navegacion = useNavigate();
-  const { servicios, setServicios } = useAppContext();
-
+  const [servicios, setServicios] = useState<Servicio[]>([]);
+ 
   useEffect(() => {
     if (titulo.includes("Editar") && id && buscarServicio) {
       const servicioBuscado = buscarServicio(id);
@@ -35,19 +36,30 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
     }
   }, []);
 
-  const onSubmit: SubmitHandler<ServicioFormData> = (data, e) => {
+  const onSubmit: SubmitHandler<ServicioFormData> = async (data, e) => {
     if (titulo.includes("Crear") && crearServicio) {
-      crearServicio(data);
-      Swal.fire({
-        title: "Servicio creado",
-        text: `El servicio '${data.nombreServicio}' fue creado correctamente`,
-        icon: "success",
-        background: "#18181b",
-        color: "#f4f4f5",
-        confirmButtonColor: "#3b82f6",
-      });
-      if (e) {
-        (e.target as HTMLFormElement).reset();
+      const respuesta = await crearServicio(data);
+      if(respuesta?.status === 201 ){
+        Swal.fire({
+          title: "Servicio creado",
+          text: `El servicio '${data.nombreServicio}' fue creado correctamente`,
+          icon: "success",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#3b82f6",
+        });
+        if (e) {
+          (e.target as HTMLFormElement).reset();
+        }
+      }else{
+         Swal.fire({
+          title: "Ocurrio un error",
+          text: `El servicio '${data.nombreServicio}' no pudo ser creado. Intentalo en unos minutos`,
+          icon: "error",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#3b82f6",
+        });
       }
     } else if (id) {
       editarServicio(id, data);
@@ -63,13 +75,6 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
     }
   };
 
-  const crearServicio = (dataServicio: ServicioFormData) => {
-    const servicioNuevo: Servicio = {
-      ...dataServicio,
-      id: crypto.randomUUID(),
-    };
-    setServicios([...servicios, servicioNuevo]);
-  };
 
   const editarServicio = (
     idServicio: string,

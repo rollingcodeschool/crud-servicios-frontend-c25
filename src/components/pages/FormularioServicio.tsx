@@ -1,10 +1,9 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Swal from "sweetalert2";
 import type { Servicio, ServicioFormData } from "../../interfaces/servicios";
-import { useAppContext } from "../../context/AppContext";
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
-import { crearServicio } from "../../helpers/queries";
+import { buscarServicioPorId, crearServicio } from "../../helpers/queries";
 
 interface FormularioProps {
   titulo: string;
@@ -22,24 +21,33 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
   const { id } = useParams<{ id: string }>();
   const navegacion = useNavigate();
   const [servicios, setServicios] = useState<Servicio[]>([]);
- 
+
   useEffect(() => {
-    if (titulo.includes("Editar") && id && buscarServicio) {
-      const servicioBuscado = buscarServicio(id);
-      if (servicioBuscado) {
+    obtenerServicio();
+  }, []);
+
+  const obtenerServicio = async () => {
+    if (titulo.includes("Editar") && id) {
+      const respuesta = await buscarServicioPorId(id);
+
+      if (respuesta?.status === 200) {
+        const servicioBuscado = await respuesta.json();
+
         setValue("nombreServicio", servicioBuscado.nombreServicio);
         setValue("precio", servicioBuscado.precio);
         setValue("categoria", servicioBuscado.categoria);
         setValue("descripcion", servicioBuscado.descripcion);
         setValue("imagen", servicioBuscado.imagen);
+      } else {
+        alert("Ocurrio un error al obtener el servicio buscado");
       }
     }
-  }, []);
+  };
 
   const onSubmit: SubmitHandler<ServicioFormData> = async (data, e) => {
     if (titulo.includes("Crear") && crearServicio) {
       const respuesta = await crearServicio(data);
-      if(respuesta?.status === 201 ){
+      if (respuesta?.status === 201) {
         Swal.fire({
           title: "Servicio creado",
           text: `El servicio '${data.nombreServicio}' fue creado correctamente`,
@@ -51,8 +59,8 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
         if (e) {
           (e.target as HTMLFormElement).reset();
         }
-      }else{
-         Swal.fire({
+      } else {
+        Swal.fire({
           title: "Ocurrio un error",
           text: `El servicio '${data.nombreServicio}' no pudo ser creado. Intentalo en unos minutos`,
           icon: "error",
@@ -75,23 +83,22 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
     }
   };
 
+  // const editarServicio = (
+  //   idServicio: string,
+  //   servicioEditar: ServicioFormData,
+  // ) => {
+  //   const serviciosEditados = servicios.map((itemServicio) => {
+  //     if (itemServicio.id === idServicio) {
+  //       return { ...itemServicio, ...servicioEditar };
+  //     }
+  //     return itemServicio;
+  //   });
+  //   setServicios(serviciosEditados);
+  // };
 
-  const editarServicio = (
-    idServicio: string,
-    servicioEditar: ServicioFormData,
-  ) => {
-    const serviciosEditados = servicios.map((itemServicio) => {
-      if (itemServicio.id === idServicio) {
-        return { ...itemServicio, ...servicioEditar };
-      }
-      return itemServicio;
-    });
-    setServicios(serviciosEditados);
-  };
-
-  const buscarServicio = (idServicio: string): Servicio | undefined => {
-    return servicios.find((item) => item.id === idServicio);
-  };
+  // const buscarServicio = (idServicio: string): Servicio | undefined => {
+  //   return servicios.find((item) => item.id === idServicio);
+  // };
 
   // Clase utilitaria para inputs consistentes
   const inputClass = (hasError: boolean) => `

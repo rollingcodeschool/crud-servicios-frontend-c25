@@ -25,3 +25,27 @@ export const crearServicio = async (datos: Servicio) => {
     console.error(error);
   }
 };
+
+export const editarServicio = async (datos: Servicio, id: string) => {
+  try {
+    const respuesta = await fetch(urlServicios+ `/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(datos),
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const buscarServicioPorId = async (id: string) => {
+  try {
+    const respuesta = await fetch(urlServicios+ `/${id}`);
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};

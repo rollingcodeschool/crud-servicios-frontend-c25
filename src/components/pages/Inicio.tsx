@@ -1,10 +1,10 @@
 import CardServicio from "../services/CardServicio";
-import { useAppContext } from "../../context/AppContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { listarServicios } from "../../helpers/queries";
 import Swal from "sweetalert2";
+import type { Servicio } from "../../interfaces/servicios";
 const Inicio = () => {
-  const { servicios, setServicios } = useAppContext();
+  const [servicios, setServicios] = useState<Servicio[]>([]);
 
   useEffect(() => {
     consultarAPI();
@@ -12,7 +12,6 @@ const Inicio = () => {
 
   const consultarAPI = async () => {
     const respuesta = await listarServicios();
-    console.log(respuesta);
     if (respuesta?.status === 200) {
       const datos = await respuesta.json();
       setServicios(datos);

@@ -20,26 +20,23 @@ function App() {
     usuarioSessionStorage,
   );
   // agregamos los servicios
-  const serviciosLocalStorage = JSON.parse(
-    localStorage.getItem("serviciosKey") || "[]",
-  );
-  const [servicios, setServicios] = useState<Servicio[]>(serviciosLocalStorage);
+  // const serviciosLocalStorage = JSON.parse(
+  //   localStorage.getItem("serviciosKey") || "[]",
+  // );
 
   useEffect(() => {
     sessionStorage.setItem("usuarioKey", JSON.stringify(usuarioLogueado));
   }, [usuarioLogueado]);
 
-  useEffect(() => {
-    localStorage.setItem("serviciosKey", JSON.stringify(servicios));
-  }, [servicios]);
+  // useEffect(() => {
+  //   localStorage.setItem("serviciosKey", JSON.stringify(servicios));
+  // }, [servicios]);
 
   return (
     <AppContext.Provider
       value={{
         usuarioLogueado,
         setUsuarioLogueado,
-        servicios,
-        setServicios,
       }}
     >
       <BrowserRouter>

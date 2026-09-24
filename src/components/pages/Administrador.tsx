@@ -1,9 +1,31 @@
 import { Link } from "react-router";
 import ItemTabla from "../services/ItemTabla";
-import { useAppContext } from "../../context/AppContext";
 import { LuCirclePlus } from "react-icons/lu";
+import { useEffect, useState } from "react";
+import { listarServicios } from "../../helpers/queries";
+import Swal from "sweetalert2";
+import type { Servicio } from "../../interfaces/servicios";
 const Administrador = () => {
-  const { servicios } = useAppContext();
+  const [servicios, setServicios] = useState<Servicio[]>([]);
+
+  useEffect(() => {
+    consultarAPI();
+  }, []);
+
+  const consultarAPI = async () => {
+    const respuesta = await listarServicios();
+    if (respuesta?.status === 200) {
+      const datos = await respuesta.json();
+      setServicios(datos);
+    } else {
+      Swal.fire({
+        title: "Ocurrio un error",
+        text: "No se pudieron obtener los datos",
+        icon: "error",
+      });
+    }
+    //usar la query listarServicios
+  };
 
   return (
     <section className="animate-fadeIn space-y-6">
@@ -49,7 +71,7 @@ const Administrador = () => {
             {servicios.length > 0 ? (
               servicios.map((servicio, indice) => (
                 <ItemTabla
-                  key={servicio.id}
+                  key={servicio._id}
                   servicio={servicio}
                   fila={indice + 1}
                 />

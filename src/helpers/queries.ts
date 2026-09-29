@@ -49,3 +49,14 @@ export const buscarServicioPorId = async (id: string) => {
     console.error(error);
   }
 };
+
+export const borrarServicio = async (id: string) => {
+  try {
+    const respuesta = await fetch(urlServicios+ `/${id}`, {
+      method: "DELETE"
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};

@@ -1,23 +1,16 @@
 import { Link } from "react-router";
 import type { Servicio } from "../../interfaces/servicios";
-import { useAppContext } from "../../context/AppContext";
 import Swal from "sweetalert2";
 import { LuTrash2, LuPencil } from "react-icons/lu";
+import { borrarServicio } from "../../helpers/queries";
 
 interface ItemTablaProps {
   servicio: Servicio;
   fila: number;
+  setServicios: React.Dispatch<React.SetStateAction<Servicio[]>>
 }
 
-const ItemTabla = ({ servicio, fila }: ItemTablaProps) => {
-  const { setServicios, servicios } = useAppContext();
-
-  const borrarServicio = (idServicio: string) => {
-    const serviciosFiltrados = servicios.filter(
-      (itemServicio) => itemServicio.id !== idServicio,
-    );
-    setServicios(serviciosFiltrados);
-  };
+const ItemTabla = ({ servicio, fila , setServicios}: ItemTablaProps) => {
 
   const eliminarServicio = () => {
     Swal.fire({
@@ -31,17 +24,30 @@ const ItemTabla = ({ servicio, fila }: ItemTablaProps) => {
       cancelButtonColor: "#ef4444", // red-500
       confirmButtonText: "Sí, borrar",
       cancelButtonText: "Cancelar",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        borrarServicio(servicio.id);
-        Swal.fire({
-          title: "Eliminado",
-          text: `El servicio fue eliminado correctamente`,
-          icon: "success",
-          background: "#18181b",
-          color: "#f4f4f5",
-          confirmButtonColor: "#3b82f6",
-        });
+        const respuesta = await borrarServicio(servicio._id);
+        if (respuesta?.status === 200) {
+          Swal.fire({
+            title: "Eliminado",
+            text: `El servicio fue eliminado correctamente`,
+            icon: "success",
+            background: "#18181b",
+            color: "#f4f4f5",
+            confirmButtonColor: "#3b82f6",
+          });
+          // usamos logica para actualizar la fila de la tabla
+          setServicios(prevServicios => prevServicios.filter((item)=> item._id !== servicio._id ))
+        }else{
+          Swal.fire({
+            title: "Ocurrio un error",
+            text: `El servicio no pudo ser eliminado. Intentelo en unos minutos`,
+            icon: "error",
+            background: "#18181b",
+            color: "#f4f4f5",
+            confirmButtonColor: "#3b82f6",
+          });
+        }
       }
     });
   };

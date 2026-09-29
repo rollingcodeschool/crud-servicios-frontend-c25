@@ -1,8 +1,8 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Swal from "sweetalert2";
-import type { Servicio, ServicioFormData } from "../../interfaces/servicios";
+import type { ServicioFormData } from "../../interfaces/servicios";
 import { useNavigate, useParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { buscarServicioPorId, crearServicio, editarServicio } from "../../helpers/queries";
 
 interface FormularioProps {
@@ -20,7 +20,6 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
   // traigo los datos que necesito del contexto
   const { id } = useParams<{ id: string }>();
   const navegacion = useNavigate();
-  const [servicios, setServicios] = useState<Servicio[]>([]);
 
   useEffect(() => {
     obtenerServicio();

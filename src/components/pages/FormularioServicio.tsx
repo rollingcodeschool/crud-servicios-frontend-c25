@@ -186,7 +186,7 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
                 <option value="Backend & API" className="bg-zinc-900">
                   Backend & API
                 </option>
-                <option value="Consultoría" className="bg-zinc-900">
+                <option value="Consultoria" className="bg-zinc-900">
                   Consultoría
                 </option>
               </select>

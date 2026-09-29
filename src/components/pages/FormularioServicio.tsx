@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import type { Servicio, ServicioFormData } from "../../interfaces/servicios";
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
-import { buscarServicioPorId, crearServicio } from "../../helpers/queries";
+import { buscarServicioPorId, crearServicio, editarServicio } from "../../helpers/queries";
 
 interface FormularioProps {
   titulo: string;
@@ -70,16 +70,27 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
         });
       }
     } else if (id) {
-      editarServicio(id, data);
-      Swal.fire({
-        title: "Servicio editado",
-        text: `El servicio '${data.nombreServicio}' fue editado correctamente`,
-        icon: "success",
-        background: "#18181b",
-        color: "#f4f4f5",
-        confirmButtonColor: "#3b82f6",
-      });
-      navegacion("/administrador");
+      const respuesta = await editarServicio(data, id);
+      if(respuesta?.status === 200){
+        Swal.fire({
+          title: "Servicio editado",
+          text: `El servicio '${data.nombreServicio}' fue editado correctamente`,
+          icon: "success",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#3b82f6",
+        });
+        navegacion("/administrador");
+      }else{
+         Swal.fire({
+          title: "Ocurrio un error",
+          text: `El servicio '${data.nombreServicio}' no pudo ser editado. Intentelo en unos minutos`,
+          icon: "error",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#3b82f6",
+        });
+      }
     }
   };
 

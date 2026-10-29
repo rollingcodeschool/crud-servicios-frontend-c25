@@ -8,9 +8,10 @@ interface ItemTablaProps {
   servicio: Servicio;
   fila: number;
   setServicios: React.Dispatch<React.SetStateAction<Servicio[]>>
+  onEliminado?: () => void;
 }
 
-const ItemTabla = ({ servicio, fila , setServicios}: ItemTablaProps) => {
+const ItemTabla = ({ servicio, fila , setServicios, onEliminado}: ItemTablaProps) => {
 
   const eliminarServicio = () => {
     Swal.fire({
@@ -38,6 +39,8 @@ const ItemTabla = ({ servicio, fila , setServicios}: ItemTablaProps) => {
           });
           // usamos logica para actualizar la fila de la tabla
           setServicios(prevServicios => prevServicios.filter((item)=> item._id !== servicio._id ))
+          // avisamos al padre para que recargue la página actual
+          onEliminado?.();
         }else{
           Swal.fire({
             title: "Ocurrio un error",

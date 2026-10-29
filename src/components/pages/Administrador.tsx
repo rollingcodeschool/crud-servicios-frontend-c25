@@ -1,19 +1,30 @@
 import { Link } from "react-router";
 import ItemTabla from "../services/ItemTabla";
+import Paginacion from "../shared/Paginacion";
 import { LuCirclePlus } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { listarServicios } from "../../helpers/queries";
 import Swal from "sweetalert2";
 import type { ListadoServicios, Servicio } from "../../interfaces/servicios";
+
+const LIMITE = 5;
+
 const Administrador = () => {
   const [servicios, setServicios] = useState<Servicio[]>([]);
+  const [pagina, setPagina] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [refrescar, setRefrescar] = useState(0);
 
   useEffect(() => {
     const consultarAPI = async () => {
-      const respuesta = await listarServicios();
+      const respuesta = await listarServicios({ pagina, limite: LIMITE });
       if (respuesta?.status === 200) {
         const datos: ListadoServicios = await respuesta.json();
+        const total = datos.totalPaginas || 1;
         setServicios(datos.servicios);
+        setTotalPaginas(total);
+        // Si se eliminaron los últimos servicios de una página, retrocedemos
+        if (pagina > total) setPagina(total);
       } else {
         Swal.fire({
           title: "Ocurrio un error",
@@ -23,7 +34,13 @@ const Administrador = () => {
       }
     };
     consultarAPI();
-  }, []);
+  }, [pagina, refrescar]);
+
+  const cambiarPagina = (nuevaPagina: number) => {
+    if (nuevaPagina === pagina) return;
+    setPagina(nuevaPagina);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <section className="animate-fadeIn space-y-6">
@@ -71,8 +88,9 @@ const Administrador = () => {
                 <ItemTabla
                   key={servicio._id}
                   servicio={servicio}
-                  fila={indice + 1}
+                  fila={(pagina - 1) * LIMITE + indice + 1}
                   setServicios={setServicios}
+                  onEliminado={() => setRefrescar((valor) => valor + 1)}
                 />
               ))
             ) : (
@@ -88,6 +106,12 @@ const Administrador = () => {
           </tbody>
         </table>
       </div>
+
+      <Paginacion
+        pagina={pagina}
+        totalPaginas={totalPaginas}
+        onCambiarPagina={cambiarPagina}
+      />
     </section>
   );
 };

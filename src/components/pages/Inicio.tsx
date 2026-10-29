@@ -2,28 +2,27 @@ import CardServicio from "../services/CardServicio";
 import { useEffect, useState } from "react";
 import { listarServicios } from "../../helpers/queries";
 import Swal from "sweetalert2";
-import type { Servicio } from "../../interfaces/servicios";
+import type { ListadoServicios, Servicio } from "../../interfaces/servicios";
 const Inicio = () => {
   const [servicios, setServicios] = useState<Servicio[]>([]);
 
   useEffect(() => {
+    const consultarAPI = async () => {
+      const respuesta = await listarServicios();
+      if (respuesta?.status === 200) {
+        const datos: ListadoServicios = await respuesta.json();
+        setServicios(datos.servicios);
+      } else {
+        Swal.fire({
+          title: "Ocurrio un error",
+          text: "No se pudieron obtener los datos",
+          icon: "error",
+        });
+      }
+    };
     consultarAPI();
   }, []);
 
-  const consultarAPI = async () => {
-    const respuesta = await listarServicios();
-    if (respuesta?.status === 200) {
-      const datos = await respuesta.json();
-      setServicios(datos);
-    } else {
-      Swal.fire({
-        title: "Ocurrio un error",
-        text: "No se pudieron obtener los datos",
-        icon: "error",
-      });
-    }
-    //usar la query listarServicios
-  };
   return (
     <section className="space-y-8 animate-fadeIn">
       {/* Encabezado con estilo moderno */}

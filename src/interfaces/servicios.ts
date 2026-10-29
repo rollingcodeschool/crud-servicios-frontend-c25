@@ -7,4 +7,11 @@ export interface Servicio {
   descripcion: string;
 }
 
+export interface ListadoServicios {
+  cantidadServicios: number;
+  paginaActual: number;
+  totalPaginas: number;
+  servicios: Servicio[];
+}
+
 export type ServicioFormData = Omit<Servicio, 'id'>;

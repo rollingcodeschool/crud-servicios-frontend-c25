@@ -7,6 +7,9 @@ export interface AppContextType {
   setUsuarioLogueado: React.Dispatch<React.SetStateAction<boolean>>;
   usuario: UsuarioAutenticado | null;
   setUsuario: React.Dispatch<React.SetStateAction<UsuarioAutenticado | null>>;
+  // cantidad total de items del carrito del usuario logueado
+  cantidadCarrito: number;
+  setCantidadCarrito: React.Dispatch<React.SetStateAction<number>>;
   // servicios: Servicio[];
   // setServicios: React.Dispatch<React.SetStateAction<Servicio[]>>;
 }

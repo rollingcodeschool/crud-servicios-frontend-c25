@@ -8,14 +8,18 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import Login from "./components/pages/Login";
 import FormularioServicio from "./components/pages/FormularioServicio";
 import ProtectorRutas from "./components/routes/ProtectorRutas";
+import Carrito from "./components/pages/Carrito";
 import { useEffect, useState } from "react";
 import { AppContext } from "./context/AppContext";
-import { obtenerPerfil } from "./helpers/queries";
+import { obtenerCarrito, obtenerPerfil } from "./helpers/queries";
+import type { Carrito as CarritoDatos } from "./interfaces/carrito";
 import type { UsuarioAutenticado } from "./interfaces/usuarios";
 
 function App() {
   const [usuarioLogueado, setUsuarioLogueado] = useState<boolean>(false);
   const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
+  // cantidad total de items del carrito del usuario logueado
+  const [cantidadCarrito, setCantidadCarrito] = useState<number>(0);
   // agregamos los servicios
   // const serviciosLocalStorage = JSON.parse(
   //   localStorage.getItem("serviciosKey") || "[]",
@@ -31,6 +35,15 @@ function App() {
           const usuarioAutenticado: UsuarioAutenticado = await respuesta.json();
           setUsuario(usuarioAutenticado);
           setUsuarioLogueado(true);
+
+          // restauramos la cantidad de items del carrito del usuario
+          const respuestaCarrito = await obtenerCarrito();
+          if (respuestaCarrito && respuestaCarrito.ok) {
+            const carrito: CarritoDatos = await respuestaCarrito.json();
+            setCantidadCarrito(
+              carrito.items.reduce((total, item) => total + item.cantidad, 0),
+            );
+          }
         }
       } catch (error) {
         console.error(error);
@@ -46,6 +59,8 @@ function App() {
         setUsuarioLogueado,
         usuario,
         setUsuario,
+        cantidadCarrito,
+        setCantidadCarrito,
       }}
     >
       <BrowserRouter>
@@ -59,6 +74,10 @@ function App() {
                 path="/detalle-servicio/:id"
                 element={<DetalleServicio></DetalleServicio>}
               ></Route>
+              {/* carrito de compras: solo para usuarios logueados */}
+              <Route path="/carrito" element={<ProtectorRutas />}>
+                <Route index element={<Carrito />} />
+              </Route>
               <Route path="/administrador" element={<ProtectorRutas />}>
                 <Route index element={<Administrador />} />
                 <Route

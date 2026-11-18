@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router";
-import { LuMenu, LuX, LuCodeXml, LuLogOut } from "react-icons/lu";
+import {
+  LuMenu,
+  LuX,
+  LuCodeXml,
+  LuLogOut,
+  LuShoppingCart,
+} from "react-icons/lu";
 import { useAppContext } from "../../context/AppContext";
 import { logoutUsuario } from "../../helpers/queries";
 
 const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { usuarioLogueado, setUsuarioLogueado, usuario, setUsuario } =
-    useAppContext();
+  const {
+    usuarioLogueado,
+    setUsuarioLogueado,
+    usuario,
+    setUsuario,
+    cantidadCarrito,
+  } = useAppContext();
   const navegacion = useNavigate();
 
   const logout = async () => {
@@ -69,6 +80,20 @@ const Menu = () => {
                   <NavLink to="/administrador" className={navLinkStyles}>
                     Administrador
                   </NavLink>
+                  {/* icono del carrito con badge de cantidad */}
+                  <NavLink
+                    to="/carrito"
+                    aria-label="Ver carrito"
+                    title="Carrito"
+                    className="relative text-zinc-300 hover:text-blue-400 transition-colors"
+                  >
+                    <LuShoppingCart className="text-2xl" />
+                    {cantidadCarrito > 0 && (
+                      <span className="absolute -top-2 -right-3 bg-blue-600 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                        {cantidadCarrito}
+                      </span>
+                    )}
+                  </NavLink>
                   {/* agregamos el boton de logout */}
                   <button
                     onClick={logout}
@@ -117,6 +142,21 @@ const Menu = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Administrador
+              </NavLink>
+              <NavLink
+                to="/carrito"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-2 py-2 px-3 text-zinc-300 hover:text-blue-400 transition-colors"
+              >
+                <span className="relative">
+                  <LuShoppingCart className="text-2xl" />
+                  {cantidadCarrito > 0 && (
+                    <span className="absolute -top-2 -right-3 bg-blue-600 text-white text-[10px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
+                      {cantidadCarrito}
+                    </span>
+                  )}
+                </span>
+                Carrito
               </NavLink>
               <button
                 onClick={() => {

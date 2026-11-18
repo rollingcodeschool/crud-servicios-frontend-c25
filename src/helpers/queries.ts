@@ -3,6 +3,7 @@ import type { ServicioFormData } from "../interfaces/servicios";
 const urlServicios = import.meta.env.VITE_SERVICIOS + "/servicios";
 const urlCategorias = import.meta.env.VITE_SERVICIOS + "/categorias";
 const urlUsuarios = import.meta.env.VITE_SERVICIOS + "/usuarios";
+const urlCarrito = import.meta.env.VITE_SERVICIOS + "/carrito";
 
 export interface ParametrosListado {
   termino?: string;
@@ -123,6 +124,77 @@ export const logoutUsuario = async () => {
   try {
     const respuesta = await fetch(urlUsuarios + "/logout", {
       method: "POST",
+      credentials: "include",
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Carrito: obtener el carrito del usuario logueado
+export const obtenerCarrito = async () => {
+  try {
+    const respuesta = await fetch(urlCarrito, {
+      credentials: "include",
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Carrito: agregar un servicio con la cantidad elegida
+export const agregarAlCarrito = async (
+  servicioId: string,
+  cantidad: number
+) => {
+  try {
+    const respuesta = await fetch(urlCarrito, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ servicioId, cantidad }),
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Carrito: vaciar el carrito del usuario logueado
+export const vaciarCarrito = async () => {
+  try {
+    const respuesta = await fetch(urlCarrito, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Carrito: quitar un servicio del carrito por su id
+export const quitarDelCarrito = async (idServicio: string) => {
+  try {
+    const respuesta = await fetch(urlCarrito + `/${idServicio}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Carrito: restar en uno la cantidad de un servicio del carrito
+export const restarCantidad = async (idServicio: string) => {
+  try {
+    const respuesta = await fetch(urlCarrito + `/${idServicio}/restar`, {
+      method: "PATCH",
       credentials: "include",
     });
     return respuesta;

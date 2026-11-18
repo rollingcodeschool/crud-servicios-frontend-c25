@@ -18,7 +18,7 @@ const CardServicio = ({ servicio }: CardServicioProps) => {
         />
         <div className="absolute top-2 right-2">
           <span className="bg-zinc-950/80 backdrop-blur-sm text-blue-400 text-xs font-bold px-2 py-1 rounded border border-zinc-700 uppercase tracking-wider">
-            {servicio.categoria}
+            {servicio.categoria?.nombre ?? "Sin categoría"}
           </span>
         </div>
       </div>

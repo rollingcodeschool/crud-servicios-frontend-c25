@@ -1,9 +1,18 @@
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Swal from "sweetalert2";
-import type { ServicioFormData } from "../../interfaces/servicios";
+import type {
+  Categoria,
+  ListadoCategorias,
+  ServicioFormData,
+} from "../../interfaces/servicios";
 import { useNavigate, useParams } from "react-router";
-import { useEffect } from "react";
-import { buscarServicioPorId, crearServicio, editarServicio } from "../../helpers/queries";
+import { useEffect, useState } from "react";
+import {
+  buscarServicioPorId,
+  crearServicio,
+  editarServicio,
+  listarCategorias,
+} from "../../helpers/queries";
 
 interface FormularioProps {
   titulo: string;
@@ -20,6 +29,30 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
   // traigo los datos que necesito del contexto
   const { id } = useParams<{ id: string }>();
   const navegacion = useNavigate();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [cargandoCategorias, setCargandoCategorias] = useState(true);
+
+  // obtenemos las categorias disponibles en el backend
+  useEffect(() => {
+    const obtenerCategorias = async () => {
+      const respuesta = await listarCategorias();
+      if (respuesta?.status === 200) {
+        const datos: ListadoCategorias = await respuesta.json();
+        setCategorias(datos.categorias);
+      } else {
+        Swal.fire({
+          title: "Ocurrio un error",
+          text: "No se pudieron obtener las categorias. Intentalo en unos minutos",
+          icon: "error",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#3b82f6",
+        });
+      }
+      setCargandoCategorias(false);
+    };
+    obtenerCategorias();
+  }, []);
 
   useEffect(() => {
     const obtenerServicio = async () => {
@@ -31,7 +64,7 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
 
           setValue("nombreServicio", servicioBuscado.nombreServicio);
           setValue("precio", servicioBuscado.precio);
-          setValue("categoria", servicioBuscado.categoria);
+          setValue("categoria", servicioBuscado.categoria?._id ?? "");
           setValue("descripcion", servicioBuscado.descripcion);
           setValue("imagen", servicioBuscado.imagen);
         } else {
@@ -171,23 +204,26 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
                 Categoría*
               </label>
               <select
+                disabled={cargandoCategorias}
                 className={inputClass(!!errors.categoria)}
                 {...register("categoria", {
                   required: "Seleccione una categoría",
                 })}
               >
                 <option value="" className="bg-zinc-900">
-                  Seleccione una opción
+                  {cargandoCategorias
+                    ? "Cargando categorías..."
+                    : "Seleccione una opción"}
                 </option>
-                <option value="Desarrollo Web" className="bg-zinc-900">
-                  Desarrollo Web
-                </option>
-                <option value="Backend & API" className="bg-zinc-900">
-                  Backend & API
-                </option>
-                <option value="Consultoria" className="bg-zinc-900">
-                  Consultoría
-                </option>
+                {categorias.map((categoria) => (
+                  <option
+                    key={categoria._id}
+                    value={categoria._id}
+                    className="bg-zinc-900"
+                  >
+                    {categoria.nombre}
+                  </option>
+                ))}
               </select>
               <p className="text-red-500 text-xs mt-1 italic">
                 {errors.categoria?.message}

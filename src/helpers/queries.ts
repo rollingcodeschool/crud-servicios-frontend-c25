@@ -1,6 +1,7 @@
-import type { Servicio } from "../interfaces/servicios";
+import type { ServicioFormData } from "../interfaces/servicios";
 
 const urlServicios = import.meta.env.VITE_SERVICIOS + "/servicios";
+const urlCategorias = import.meta.env.VITE_SERVICIOS + "/categorias";
 
 export interface ParametrosListado {
   termino?: string;
@@ -22,7 +23,18 @@ export const listarServicios = async (params?: ParametrosListado) => {
   }
 };
 
-export const crearServicio = async (datos: Servicio) => {
+export const listarCategorias = async (pagina = 1, limite = 100) => {
+  try {
+    const respuesta = await fetch(
+      `${urlCategorias}?pagina=${pagina}&limite=${limite}`
+    );
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const crearServicio = async (datos: ServicioFormData) => {
   try {
     const respuesta = await fetch(urlServicios, {
       method: "POST",
@@ -37,7 +49,7 @@ export const crearServicio = async (datos: Servicio) => {
   }
 };
 
-export const editarServicio = async (datos: Servicio, id: string) => {
+export const editarServicio = async (datos: ServicioFormData, id: string) => {
   try {
     const respuesta = await fetch(urlServicios+ `/${id}`, {
       method: "PUT",

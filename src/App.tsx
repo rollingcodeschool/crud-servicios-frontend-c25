@@ -10,32 +10,42 @@ import FormularioServicio from "./components/pages/FormularioServicio";
 import ProtectorRutas from "./components/routes/ProtectorRutas";
 import { useEffect, useState } from "react";
 import { AppContext } from "./context/AppContext";
+import { obtenerPerfil } from "./helpers/queries";
+import type { UsuarioAutenticado } from "./interfaces/usuarios";
 
 function App() {
-  const usuarioSessionStorage = JSON.parse(
-    sessionStorage.getItem("usuarioKey") || "false",
-  );
-  const [usuarioLogueado, setUsuarioLogueado] = useState<boolean>(
-    usuarioSessionStorage,
-  );
+  const [usuarioLogueado, setUsuarioLogueado] = useState<boolean>(false);
+  const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
   // agregamos los servicios
   // const serviciosLocalStorage = JSON.parse(
   //   localStorage.getItem("serviciosKey") || "[]",
   // );
 
+  // Al montar la app validamos la sesion con la cookie httpOnly del backend
+  // Si la cookie sigue vigente, restauramos el usuario logueado
   useEffect(() => {
-    sessionStorage.setItem("usuarioKey", JSON.stringify(usuarioLogueado));
-  }, [usuarioLogueado]);
-
-  // useEffect(() => {
-  //   localStorage.setItem("serviciosKey", JSON.stringify(servicios));
-  // }, [servicios]);
+    const validarSesion = async () => {
+      try {
+        const respuesta = await obtenerPerfil();
+        if (respuesta && respuesta.ok) {
+          const usuarioAutenticado: UsuarioAutenticado = await respuesta.json();
+          setUsuario(usuarioAutenticado);
+          setUsuarioLogueado(true);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    validarSesion();
+  }, []);
 
   return (
     <AppContext.Provider
       value={{
         usuarioLogueado,
         setUsuarioLogueado,
+        usuario,
+        setUsuario,
       }}
     >
       <BrowserRouter>

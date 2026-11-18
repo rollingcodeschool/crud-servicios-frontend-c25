@@ -2,6 +2,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useAppContext } from "../../context/AppContext";
+import { loginUsuario, obtenerPerfil } from "../../helpers/queries";
+import type { UsuarioAutenticado } from "../../interfaces/usuarios";
 
 // Definimos la estructura de los datos del formulario
 interface LoginFormInputs {
@@ -11,7 +13,7 @@ interface LoginFormInputs {
 
 const Login = () => {
   // usamos los datos necesarios del contexto
-  const { setUsuarioLogueado } = useAppContext();
+  const { setUsuarioLogueado, setUsuario } = useAppContext();
   const {
     register,
     handleSubmit,
@@ -19,27 +21,47 @@ const Login = () => {
   } = useForm<LoginFormInputs>();
   const navegacion = useNavigate();
 
-  const onSubmit = (data: LoginFormInputs) => {
-    //1- si los datos del formulario son correctos y coinciden con las credenciales del admin loguear al usuario
-    if (
-      data.email === import.meta.env.VITE_EMAIL &&
-      data.password === import.meta.env.VITE_PASSWORD
-    ) {
-      setUsuarioLogueado(true);
-      Swal.fire({
-        title: "Bienvenido Administrador",
-        text: "Ingresando al sistema",
-        icon: "success",
-        background: "#18181b",
-        color: "#f4f4f5",
-        confirmButtonColor: "#3b82f6",
-      });
-      //redirecciono al admin
-      navegacion("/administrador");
-    } else {
+  const onSubmit = async (data: LoginFormInputs) => {
+    //1- enviamos las credenciales al backend, si son validas nos devuelve una cookie httpOnly con el token
+    try {
+      const respuesta = await loginUsuario(data.email, data.password);
+
+      if (respuesta && respuesta.ok) {
+        const datos = await respuesta.json();
+        setUsuarioLogueado(true);
+        // pedimos el perfil para guardar los datos completos del usuario
+        const respuestaPerfil = await obtenerPerfil();
+        if (respuestaPerfil && respuestaPerfil.ok) {
+          const usuarioAutenticado: UsuarioAutenticado =
+            await respuestaPerfil.json();
+          setUsuario(usuarioAutenticado);
+        }
+        Swal.fire({
+          title: `Bienvenido ${datos.nombre}`,
+          text: "Ingresando al sistema",
+          icon: "success",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#3b82f6",
+        });
+        //redirecciono al admin
+        navegacion("/administrador");
+      } else {
+        Swal.fire({
+          title: "Ocurrió un error",
+          text: "Credenciales incorrectas",
+          icon: "error",
+          background: "#18181b",
+          color: "#f4f4f5",
+          confirmButtonColor: "#ef4444",
+        });
+      }
+    } catch (error) {
+      // si ocurre un error de red mostramos el mensaje
+      console.error(error);
       Swal.fire({
         title: "Ocurrió un error",
-        text: "Credenciales incorrectas",
+        text: "No se pudo conectar con el servidor",
         icon: "error",
         background: "#18181b",
         color: "#f4f4f5",

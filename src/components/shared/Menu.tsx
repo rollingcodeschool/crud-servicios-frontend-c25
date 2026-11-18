@@ -2,14 +2,19 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router";
 import { LuMenu, LuX, LuCodeXml, LuLogOut } from "react-icons/lu";
 import { useAppContext } from "../../context/AppContext";
+import { logoutUsuario } from "../../helpers/queries";
 
 const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { usuarioLogueado, setUsuarioLogueado } = useAppContext();
+  const { usuarioLogueado, setUsuarioLogueado, usuario, setUsuario } =
+    useAppContext();
   const navegacion = useNavigate();
 
-  const logout = () => {
+  const logout = async () => {
+    // pedimos al backend que borre la cookie del token
+    await logoutUsuario();
     setUsuarioLogueado(false);
+    setUsuario(null);
     navegacion("/");
   };
 
@@ -57,6 +62,10 @@ const Menu = () => {
 
               {usuarioLogueado ? (
                 <>
+                  {/* saludo con el nombre del usuario logueado */}
+                  <span className="text-zinc-400 text-sm capitalize">
+                    Hola, {usuario?.nombre}
+                  </span>
                   <NavLink to="/administrador" className={navLinkStyles}>
                     Administrador
                   </NavLink>
@@ -98,6 +107,10 @@ const Menu = () => {
 
           {usuarioLogueado ? (
             <>
+              {/* saludo con el nombre del usuario logueado */}
+              <span className="block px-3 py-2 text-zinc-400 text-sm capitalize">
+                Hola, {usuario?.nombre}
+              </span>
               <NavLink
                 to="/administrador"
                 className={navLinkStyles}

@@ -39,6 +39,7 @@ export const crearServicio = async (datos: ServicioFormData) => {
   try {
     const respuesta = await fetch(urlServicios, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -54,6 +55,7 @@ export const editarServicio = async (datos: ServicioFormData, id: string) => {
   try {
     const respuesta = await fetch(urlServicios+ `/${id}`, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -77,7 +79,8 @@ export const buscarServicioPorId = async (id: string) => {
 export const borrarServicio = async (id: string) => {
   try {
     const respuesta = await fetch(urlServicios+ `/${id}`, {
-      method: "DELETE"
+      method: "DELETE",
+      credentials: "include"
     });
     return respuesta;
   } catch (error) {

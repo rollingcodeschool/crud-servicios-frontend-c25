@@ -1,0 +1,23 @@
+# Configuracion de build y redirects de Netlify
+# Docs: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  command = "pnpm run build"
+  publish = "dist"
+
+# Proxy de la API: reenvia /api/* al backend de Render sin cambiar la URL
+# del navegador (status 200 = rewrite/proxy, NO redirect 301/302).
+# Asi la cookie httpOnly que setea el backend queda en el dominio del
+# frontend (first-party) y ningun navegador la bloquea.
+[[redirects]]
+  from = "/api/*"
+  to = "https://crud-servicios-backend-c25.onrender.com/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback: cualquier otra ruta sirve index.html (React Router).
+# Debe ir DESPUES del proxy /api/* para no tragar las llamadas a la API.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

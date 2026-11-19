@@ -19,6 +19,8 @@ import type { UsuarioAutenticado } from "./interfaces/usuarios";
 function App() {
   const [usuarioLogueado, setUsuarioLogueado] = useState<boolean>(false);
   const [usuario, setUsuario] = useState<UsuarioAutenticado | null>(null);
+  // true mientras validamos la cookie de sesion contra el backend al arrancar
+  const [verificandoSesion, setVerificandoSesion] = useState<boolean>(true);
   // cantidad total de items del carrito del usuario logueado
   const [cantidadCarrito, setCantidadCarrito] = useState<number>(0);
   // agregamos los servicios
@@ -48,6 +50,9 @@ function App() {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        // el guard necesita saber que la verificacion termino (sea exitosa o no)
+        setVerificandoSesion(false);
       }
     };
     validarSesion();
@@ -60,6 +65,8 @@ function App() {
         setUsuarioLogueado,
         usuario,
         setUsuario,
+        verificandoSesion,
+        setVerificandoSesion,
         cantidadCarrito,
         setCantidadCarrito,
       }}

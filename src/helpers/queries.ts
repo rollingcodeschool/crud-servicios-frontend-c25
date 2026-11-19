@@ -4,6 +4,7 @@ const urlServicios = import.meta.env.VITE_SERVICIOS + "/servicios";
 const urlCategorias = import.meta.env.VITE_SERVICIOS + "/categorias";
 const urlUsuarios = import.meta.env.VITE_SERVICIOS + "/usuarios";
 const urlCarrito = import.meta.env.VITE_SERVICIOS + "/carrito";
+const urlOrdenes = import.meta.env.VITE_SERVICIOS + "/ordenes";
 
 export interface ParametrosListado {
   termino?: string;
@@ -195,6 +196,20 @@ export const restarCantidad = async (idServicio: string) => {
   try {
     const respuesta = await fetch(urlCarrito + `/${idServicio}/restar`, {
       method: "PATCH",
+      credentials: "include",
+    });
+    return respuesta;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// Ordenes: crear una orden de compra con los items del carrito del usuario
+// El backend responde con { ordenId, checkout_url } para pagar con Mercado Pago
+export const crearOrden = async () => {
+  try {
+    const respuesta = await fetch(urlOrdenes, {
+      method: "POST",
       credentials: "include",
     });
     return respuesta;

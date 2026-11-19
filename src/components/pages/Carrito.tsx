@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import Swal from "sweetalert2";
 import {
   LuArrowLeft,
+  LuCreditCard,
   LuMinus,
   LuShoppingCart,
   LuTrash,
@@ -13,11 +14,13 @@ import type {
   ItemCarrito,
 } from "../../interfaces/carrito";
 import {
+  crearOrden,
   obtenerCarrito,
   quitarDelCarrito,
   restarCantidad,
   vaciarCarrito,
 } from "../../helpers/queries";
+import type { RespuestaOrden } from "../../interfaces/ordenes";
 import { formatearPrecio } from "../../utils/formateador";
 import { useAppContext } from "../../context/AppContext";
 
@@ -131,6 +134,32 @@ const Carrito = () => {
     0,
   );
 
+  const comprar = async () => {
+    const resultado = await Swal.fire({
+      title: "¿Confirmar compra?",
+      text: `Total a pagar: ${formatearPrecio(total)}`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#059669",
+      confirmButtonText: "Comprar",
+      cancelButtonText: "Cancelar",
+    });
+    if (resultado.isConfirmed) {
+      const respuesta = await crearOrden();
+      if (respuesta && respuesta.ok) {
+        const datos: RespuestaOrden = await respuesta.json();
+        // redirigimos al checkout de Mercado Pago (navegacion externa)
+        window.location.assign(datos.checkout_url);
+      } else {
+        Swal.fire({
+          title: "Ocurrio un error",
+          text: "No se pudo crear la orden de compra",
+          icon: "error",
+        });
+      }
+    }
+  };
+
   return (
     <section className="space-y-8 animate-fadeIn">
       {/* Encabezado */}
@@ -223,7 +252,7 @@ const Carrito = () => {
             </article>
           ))}
 
-          {/* Total y vaciar carrito */}
+          {/* Total, vaciar y comprar */}
           <div className="bg-zinc-900 rounded-xl border border-zinc-800 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
               type="button"
@@ -233,13 +262,23 @@ const Carrito = () => {
               <LuTrash />
               Vaciar carrito
             </button>
-            <div className="text-right">
-              <p className="text-xs text-zinc-500 uppercase font-semibold">
-                Total
-              </p>
-              <p className="text-2xl font-bold font-mono text-blue-400">
-                {formatearPrecio(total)}
-              </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="text-right">
+                <p className="text-xs text-zinc-500 uppercase font-semibold">
+                  Total
+                </p>
+                <p className="text-2xl font-bold font-mono text-blue-400">
+                  {formatearPrecio(total)}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={comprar}
+                className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-3 rounded-lg text-sm font-bold transition-colors shadow-md shadow-emerald-900/20 active:scale-95"
+              >
+                <LuCreditCard />
+                Comprar
+              </button>
             </div>
           </div>
         </div>

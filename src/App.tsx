@@ -9,6 +9,7 @@ import Login from "./components/pages/Login";
 import FormularioServicio from "./components/pages/FormularioServicio";
 import ProtectorRutas from "./components/routes/ProtectorRutas";
 import Carrito from "./components/pages/Carrito";
+import ResultadoPago from "./components/pages/ResultadoPago";
 import { useEffect, useState } from "react";
 import { AppContext } from "./context/AppContext";
 import { obtenerCarrito, obtenerPerfil } from "./helpers/queries";
@@ -78,6 +79,19 @@ function App() {
               <Route path="/carrito" element={<ProtectorRutas />}>
                 <Route index element={<Carrito />} />
               </Route>
+              {/* vistas de retorno del pago con Mercado Pago */}
+              <Route
+                path="/pago/exitoso"
+                element={<ResultadoPago estado={"exitoso"} />}
+              />
+              <Route
+                path="/pago/fallido"
+                element={<ResultadoPago estado={"fallido"} />}
+              />
+              <Route
+                path="/pago/pendiente"
+                element={<ResultadoPago estado={"pendiente"} />}
+              />
               <Route path="/administrador" element={<ProtectorRutas />}>
                 <Route index element={<Administrador />} />
                 <Route

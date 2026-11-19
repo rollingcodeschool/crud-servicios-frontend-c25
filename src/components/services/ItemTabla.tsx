@@ -60,6 +60,19 @@ const ItemTabla = ({ servicio, fila , setServicios, onEliminado}: ItemTablaProps
       <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 font-mono">
         {fila}
       </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="w-12 h-12 rounded-lg border border-zinc-700 bg-zinc-950 overflow-hidden flex items-center justify-center">
+          {servicio.imagen ? (
+            <img
+              src={servicio.imagen}
+              alt={`Imagen de ${servicio.nombreServicio}`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-zinc-600 text-[10px] italic">Sin img</span>
+          )}
+        </div>
+      </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-200">
         {servicio.nombreServicio}
       </td>

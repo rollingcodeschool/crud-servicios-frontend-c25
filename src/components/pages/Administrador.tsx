@@ -72,6 +72,9 @@ const Administrador = () => {
                 #
               </th>
               <th className="px-6 py-4 text-xs uppercase tracking-wider text-zinc-500 font-bold">
+                Imagen
+              </th>
+              <th className="px-6 py-4 text-xs uppercase tracking-wider text-zinc-500 font-bold">
                 Servicio
               </th>
               <th className="px-6 py-4 text-xs uppercase tracking-wider text-zinc-500 font-bold">
@@ -96,7 +99,7 @@ const Administrador = () => {
             ) : (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={5}
                   className="px-6 py-12 text-center text-zinc-500 italic"
                 >
                   No hay servicios registrados para administrar.

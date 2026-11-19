@@ -27,7 +27,10 @@ export interface ListadoCategorias {
   categorias: Categoria[];
 }
 
-// Datos que envia el formulario: sin _id y con la categoria como ID (string)
-export type ServicioFormData = Omit<Servicio, "_id" | "categoria"> & {
+// Datos que envia el formulario: sin _id y con la categoria como ID (string).
+// La imagen es un archivo opcional (input type="file"), el backend asigna
+// una imagen por defecto si no se sube ninguna.
+export type ServicioFormData = Omit<Servicio, "_id" | "categoria" | "imagen"> & {
   categoria: string;
+  imagen?: FileList;
 };

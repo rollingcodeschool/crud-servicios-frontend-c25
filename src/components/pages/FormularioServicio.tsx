@@ -31,6 +31,25 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
   const navegacion = useNavigate();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [cargandoCategorias, setCargandoCategorias] = useState(true);
+  // preview de la imagen: la actual del servicio (editar) o la del archivo elegido
+  const esEdicion = titulo.includes("Editar");
+  const [imagenActual, setImagenActual] = useState<string | null>(null);
+  const [previewArchivo, setPreviewArchivo] = useState<string | null>(null);
+
+  // cuando el usuario elige un archivo generamos la preview con una URL local
+  const cambiarImagen = (evento: React.ChangeEvent<HTMLInputElement>) => {
+    const archivo = evento.target.files?.[0];
+    setPreviewArchivo(archivo ? URL.createObjectURL(archivo) : null);
+  };
+
+  // liberamos la URL local de la preview anterior y al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (previewArchivo) {
+        URL.revokeObjectURL(previewArchivo);
+      }
+    };
+  }, [previewArchivo]);
 
   // obtenemos las categorias disponibles en el backend
   useEffect(() => {
@@ -56,7 +75,7 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
 
   useEffect(() => {
     const obtenerServicio = async () => {
-      if (titulo.includes("Editar") && id) {
+      if (esEdicion && id) {
         const respuesta = await buscarServicioPorId(id);
 
         if (respuesta?.status === 200) {
@@ -66,17 +85,18 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
           setValue("precio", servicioBuscado.precio);
           setValue("categoria", servicioBuscado.categoria?._id ?? "");
           setValue("descripcion", servicioBuscado.descripcion);
-          setValue("imagen", servicioBuscado.imagen);
+          // la imagen actual solo se usa para la preview, no se envia al editar
+          setImagenActual(servicioBuscado.imagen ?? null);
         } else {
           alert("Ocurrio un error al obtener el servicio buscado");
         }
       }
     };
     obtenerServicio();
-  }, [titulo, id, setValue]);
+  }, [esEdicion, id, setValue]);
 
   const onSubmit: SubmitHandler<ServicioFormData> = async (data, e) => {
-    if (titulo.includes("Crear") && crearServicio) {
+    if (!esEdicion) {
       const respuesta = await crearServicio(data);
       if (respuesta?.status === 201) {
         Swal.fire({
@@ -89,6 +109,8 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
         });
         if (e) {
           (e.target as HTMLFormElement).reset();
+          // limpiamos la preview al resetear el formulario
+          setPreviewArchivo(null);
         }
       } else {
         Swal.fire({
@@ -230,27 +252,58 @@ const FormularioServicio = ({ titulo }: FormularioProps) => {
               </p>
             </div>
 
-            {/* URL Imagen */}
+            {/* Imagen (archivo opcional) */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-zinc-300 mb-2">
-                URL de Imagen*
+                Imagen (opcional, máx 2MB)
               </label>
-              <input
-                type="text"
-                placeholder="https://ejemplo.com/imagen.jpg"
-                className={inputClass(!!errors.imagen)}
-                {...register("imagen", {
-                  required: "La URL es obligatoria",
-                  pattern: {
-                    value: /\.(jpg|jpeg|png|webp|avif|svg)$/,
-                    message:
-                      "Debe ser una URL de imagen válida (jpg, png, webp, etc.)",
-                  },
-                })}
-              />
-              <p className="text-red-500 text-xs mt-1 italic">
-                {errors.imagen?.message}
-              </p>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                {/* Preview de la imagen subida o la actual del servicio */}
+                <div className="w-32 h-32 shrink-0 rounded-xl border border-zinc-700 bg-zinc-950 overflow-hidden flex items-center justify-center">
+                  {previewArchivo || imagenActual ? (
+                    <img
+                      src={previewArchivo ?? imagenActual ?? ""}
+                      alt="Vista previa de la imagen del servicio"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-zinc-600 text-xs italic text-center px-2">
+                      Sin imagen
+                    </span>
+                  )}
+                </div>
+                <div className="flex-1 w-full">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className={`w-full px-4 py-2.5 bg-zinc-950 border rounded-lg text-zinc-100 file:mr-4 file:py-1.5 file:px-4 file:rounded-md file:border-0 file:bg-blue-600 file:text-white file:font-bold file:cursor-pointer file:transition-colors hover:file:bg-blue-500 cursor-pointer
+                    focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all
+                    ${errors.imagen ? "border-red-500" : "border-zinc-700"}`}
+                    {...register("imagen", {
+                      onChange: cambiarImagen,
+                      validate: (archivos) => {
+                        const archivo = archivos?.[0];
+                        if (!archivo) return true;
+                        if (!archivo.type.startsWith("image/")) {
+                          return "El archivo debe ser una imagen";
+                        }
+                        if (archivo.size > 2 * 1024 * 1024) {
+                          return "La imagen no puede superar los 2MB";
+                        }
+                        return true;
+                      },
+                    })}
+                  />
+                  <p className="text-zinc-500 text-xs mt-2">
+                    {esEdicion
+                      ? "Si no elegís una imagen nueva, se mantiene la actual."
+                      : "Si no subís una imagen, se asignará una por defecto."}
+                  </p>
+                  <p className="text-red-500 text-xs mt-1 italic">
+                    {errors.imagen?.message}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Descripción */}

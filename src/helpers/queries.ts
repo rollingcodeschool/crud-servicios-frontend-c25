@@ -37,15 +37,28 @@ export const listarCategorias = async (pagina = 1, limite = 100) => {
   }
 };
 
+// Armamos el cuerpo multipart/form-data: texto plano + archivo de imagen opcional.
+// Si no hay imagen, el backend asigna una por defecto.
+const armarFormData = (datos: ServicioFormData) => {
+  const formData = new FormData();
+  formData.append("nombreServicio", datos.nombreServicio);
+  formData.append("precio", String(datos.precio));
+  formData.append("categoria", datos.categoria);
+  formData.append("descripcion", datos.descripcion);
+  const archivo = datos.imagen?.[0];
+  if (archivo) {
+    formData.append("imagen", archivo);
+  }
+  return formData;
+};
+
 export const crearServicio = async (datos: ServicioFormData) => {
   try {
     const respuesta = await fetch(urlServicios, {
       method: "POST",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(datos),
+      // No seteamos Content-Type: el navegador genera el boundary del multipart
+      body: armarFormData(datos),
     });
     return respuesta;
   } catch (error) {
@@ -58,10 +71,8 @@ export const editarServicio = async (datos: ServicioFormData, id: string) => {
     const respuesta = await fetch(urlServicios+ `/${id}`, {
       method: "PUT",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(datos),
+      // No seteamos Content-Type: el navegador genera el boundary del multipart
+      body: armarFormData(datos),
     });
     return respuesta;
   } catch (error) {
